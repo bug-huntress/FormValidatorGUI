@@ -1,0 +1,218 @@
+package linearSearch;
+import javax.swing.*;
+import java.awt.*;
+import java.util.regex.Pattern;
+
+public class FormValidator {
+    // UI Components
+    private JFrame frame;
+    private JTextField nameField, ageField, emailField;
+    private JLabel nameLabel, ageLabel, emailLabel, statusLabel;
+    private JButton submitButton, resetButton, clearButton;
+    
+    // Regex pattern for email validation
+    private static final Pattern EMAIL_PATTERN = 
+        Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new FormValidator().createAndShowGUI());
+    }
+    
+    /**
+     * Initializes and displays the form validator GUI
+     */
+    private void createAndShowGUI() {
+        frame = new JFrame("Form Validator - Kaushiki");
+        frame.setSize(450, 350);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(null);
+        
+        initializeComponents();
+        addComponentsToFrame();
+        setupEventHandlers();
+        
+        frame.setVisible(true);
+    }
+    
+    /**
+     * Creates all form components with proper positioning
+     */
+    private void initializeComponents() {
+        // Title
+        JLabel titleLabel = new JLabel("User Registration Form", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setBounds(50, 10, 350, 30);
+        frame.add(titleLabel);
+        
+        // Name field
+        nameLabel = new JLabel("Name:");
+        nameLabel.setBounds(50, 60, 100, 25);
+        nameField = new JTextField();
+        nameField.setBounds(150, 60, 250, 25);
+        
+        // Age field
+        ageLabel = new JLabel("Age:");
+        ageLabel.setBounds(50, 100, 100, 25);
+        ageField = new JTextField();
+        ageField.setBounds(150, 100, 250, 25);
+        
+        // Email field
+        emailLabel = new JLabel("Email:");
+        emailLabel.setBounds(50, 140, 100, 25);
+        emailField = new JTextField();
+        emailField.setBounds(150, 140, 250, 25);
+        
+        // Status label (for success/error messages)
+        statusLabel = new JLabel("", SwingConstants.CENTER);
+        statusLabel.setBounds(50, 180, 350, 30);
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        
+        // Buttons
+        submitButton = new JButton("Submit");
+        submitButton.setBounds(50, 230, 110, 35);
+        submitButton.setBackground(new Color(34, 139, 34));
+        submitButton.setForeground(Color.WHITE);
+        
+        resetButton = new JButton("Reset");
+        resetButton.setBounds(170, 230, 110, 35);
+        
+        clearButton = new JButton("Clear");
+        clearButton.setBounds(290, 230, 110, 35);
+    }
+    
+    /**
+     * Adds all components to the frame
+     */
+    private void addComponentsToFrame() {
+        frame.add(nameLabel);
+        frame.add(nameField);
+        frame.add(ageLabel);
+        frame.add(ageField);
+        frame.add(emailLabel);
+        frame.add(emailField);
+        frame.add(statusLabel);
+        frame.add(submitButton);
+        frame.add(resetButton);
+        frame.add(clearButton);
+    }
+    
+    /**
+     * Sets up button click handlers and validation logic
+     */
+    private void setupEventHandlers() {
+        // Submit button - validates and processes form
+        submitButton.addActionListener(e -> handleSubmit());
+        
+        // Reset button - clears fields and status
+        resetButton.addActionListener(e -> resetForm());
+        
+        // Clear button - shows confirmation dialog before clearing
+        clearButton.addActionListener(e -> {
+            int choice = JOptionPane.showConfirmDialog(
+                frame, 
+                "Are you sure you want to clear all fields?",
+                "Confirm Clear", 
+                JOptionPane.YES_NO_OPTION
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                resetForm();
+            }
+        });
+    }
+    
+    /**
+     * Validates all form inputs and displays appropriate messages
+     */
+    private void handleSubmit() {
+        try {
+            String name = nameField.getText().trim();
+            String ageText = ageField.getText().trim();
+            String email = emailField.getText().trim();
+            
+            // Validate name (not empty, only letters and spaces)
+            if (!validateName(name)) {
+                showError("Name must contain only letters and not be empty!");
+                return;
+            }
+            
+            // Validate age (must be a number between 1-120)
+            if (!validateAge(ageText)) {
+                showError("Age must be a valid number between 1 and 120!");
+                return;
+            }
+            
+            // Validate email format
+            if (!validateEmail(email)) {
+                showError("Please enter a valid email address!");
+                return;
+            }
+            
+            // All validations passed
+            showSuccess("Form submitted successfully!");
+            
+            // Show confirmation dialog with entered data
+            String message = String.format(
+                "Registration Successful!\n\nName: %s\nAge: %s\nEmail: %s",
+                name, ageText, email
+            );
+            JOptionPane.showMessageDialog(frame, message, "Success", 
+                JOptionPane.INFORMATION_MESSAGE);
+            
+        } catch (Exception ex) {
+            showError("An unexpected error occurred: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Validates name - checks if not empty and contains only letters/spaces
+     */
+    private boolean validateName(String name) {
+        return !name.isEmpty() && name.matches("^[a-zA-Z\\s]+$");
+    }
+    
+    /**
+     * Validates age - checks if it's a valid number within reasonable range
+     */
+    private boolean validateAge(String ageText) {
+        try {
+            int age = Integer.parseInt(ageText);
+            return age > 0 && age <= 120;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Validates email format using regex pattern
+     */
+    private boolean validateEmail(String email) {
+        return !email.isEmpty() && EMAIL_PATTERN.matcher(email).matches();
+    }
+    
+    /**
+     * Displays error message in red
+     */
+    private void showError(String message) {
+        statusLabel.setText(message);
+        statusLabel.setForeground(Color.RED);
+    }
+    
+    /**
+     * Displays success message in green
+     */
+    private void showSuccess(String message) {
+        statusLabel.setText(message);
+        statusLabel.setForeground(new Color(34, 139, 34));
+    }
+    
+    /**
+     * Resets all form fields and clears status message
+     */
+    private void resetForm() {
+        nameField.setText("");
+        ageField.setText("");
+        emailField.setText("");
+        statusLabel.setText("");
+    }
+}
+
